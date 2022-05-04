@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "minecraft-rcon-client": "^1.0.1"
+  }
+}
