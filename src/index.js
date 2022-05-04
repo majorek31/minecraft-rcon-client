@@ -23,7 +23,7 @@ module.exports = class Rcon {
                 this.connected = true
                 this.id = crypto.randomInt(32752) // random number because why not?
                 this.sendRaw(this.options.password, 3) // request id 3 stands for login request
-                this.socket.on('data', (data) =>{
+                this.socket.once('data', (data) =>{
                     let response = data.readInt32LE(4)
                     if (response == this.id){
                         this.authed = true
@@ -33,7 +33,6 @@ module.exports = class Rcon {
                         this.disconnect()
                         reject(new Error('Authentication error'))
                     }
-                        
                 })
             })
         })
@@ -57,7 +56,7 @@ module.exports = class Rcon {
             if (!this.authed || !this.connected)
                 reject(new Error('Authentication error'))
             this.sendRaw(cmd, 2) // request id 2 stands for command execute request
-            this.socket.on('data', (data) => {
+            this.socket.once('data', (data) => {
                 resolve(data.toString('ascii', 12))
             })
         })

@@ -1,4 +1,4 @@
-const Rcon = require('minecraft-rcon-protocol')
+const Rcon = require('minecraft-rcon-client')
 const client = new Rcon({
     port: 25575,
     host: 'localhost',

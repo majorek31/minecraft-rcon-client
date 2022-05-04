@@ -1,14 +1,16 @@
-const rcon = require('../src/index')
-rcon.rcon({
+const Rcon = require('minecraft-rcon-protocol')
+const client = new Rcon({
     port: 25575,
-    host: 'localhost', 
+    host: 'localhost',
     password: 'test'
 })
-rcon.connect().then(() =>{
-    console.log('Connected to server')
-    rcon.send("time query day").then((response) => {
+client.connect().then(() => {
+    client.send("time query day").then((response) => {
         console.log(response)
+        client.disconnect()
+    }).catch(err => {
+        console.log("An error occurred while sending the query!")
     })
-}).catch((err) => {
-    if (err) throw err;
+}).catch(err => {
+    console.log("Connection to server cannot be established!")
 })
