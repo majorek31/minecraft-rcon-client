@@ -17,7 +17,7 @@ module.exports = class Rcon {
     }
     connect(){
         return new Promise((resolve, reject) => {
-            this.socket = net.createConnection({port: this.options.port})
+            this.socket = net.createConnection({host: this.options.host, port: this.options.port})
             this.socket.on('error', () => reject(new Error('Connection error')))
             this.socket.on('connect', () => {
                 this.connected = true
