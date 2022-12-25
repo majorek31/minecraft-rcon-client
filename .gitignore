@@ -1,4 +1,2 @@
 node_modules
-examples/node_modules
-examples/package.json
-examples/package-lock.json
+lib
