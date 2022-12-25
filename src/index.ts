@@ -2,22 +2,30 @@
 author: majorek31
 credits: https://wiki.vg/RCON
 */
-const net = require('net')
-const Buffer = require('buffer').Buffer
-const crypto = require('crypto')
-
-module.exports = class Rcon {
-    constructor(options){
+import * as net from 'net';
+import { Buffer } from 'buffer';
+import * as crypto from 'crypto';
+type Options = {
+    host: string,
+    port: number,
+    password: String
+};
+export class Rcon {
+    options: Options;
+    socket: net.Socket | undefined;
+    connected: boolean;
+    authed: boolean;
+    id: number;
+    constructor(options: Options){
         this.options = options
-    
-        this.socket = null
+
         this.connected = false
         this.authed = false
-        this.id
+        this.id = 0;
     }
     connect(){
-        return new Promise((resolve, reject) => {
-            this.socket = net.createConnection({host: this.options.host, port: this.options.port})
+        return new Promise<Error | null>((resolve, reject) => {
+            this.socket = net.createConnection(this.options.port, this.options.host);
             this.socket.on('error', () => reject(new Error('Connection error')))
             this.socket.on('connect', () => {
                 this.connected = true
@@ -27,7 +35,7 @@ module.exports = class Rcon {
                     let response = data.readInt32LE(4)
                     if (response == this.id){
                         this.authed = true
-                        resolve()
+                        resolve(null);
                     }
                     else{
                         this.disconnect()
