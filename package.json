@@ -1,15 +1,17 @@
 {
   "name": "minecraft-rcon-client",
-  "version": "1.5.2",
+  "version": "2.0.0-DEV",
   "description": "RCON client made for minecraft servers",
   "repository": {
     "type": "git",
     "url": "https://github.com/majorek31/minecraft-rcon-client.git"
   },
-  "main": "src/index.js",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "tsc"
+    "build": "tsc",
+    "prepare": "npm run build"
   },
   "keywords": [
     "nodejs",
@@ -24,5 +26,6 @@
   },
   "devDependencies": {
     "@types/node": "^18.11.17"
-  }
+  },
+  "files": ["lib/**/*"]
 }
