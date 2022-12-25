@@ -52,25 +52,25 @@ export class Rcon {
     sendRaw(data: string, requestId: RequestId) {
         return new Promise((resolve, reject) => {
             if (!this.connected)
-                reject(new Error('Authentication error'))
-            let len = Buffer.byteLength(data)
-            let buffer = Buffer.alloc(len + 14)
-            buffer.writeInt32LE(len + 10, 0)
-            buffer.writeInt32LE(this.id, 4)
-            buffer.writeInt32LE(requestId, 8)
-            buffer.write(data, 12, 'ascii')
-            buffer.writeInt16LE(0, 12 + len)
-            this.socket.write(buffer)
+                reject(new Error('Authentication error'));
+            let len = Buffer.byteLength(data);
+            let buffer = Buffer.alloc(len + 14);
+            buffer.writeInt32LE(len + 10, 0);
+            buffer.writeInt32LE(this.id, 4);
+            buffer.writeInt32LE(requestId, 8);
+            buffer.write(data, 12, 'ascii');
+            buffer.writeInt16LE(0, 12 + len);
+            this.socket.write(buffer);
+            this.socket.once('data', (data: Buffer) => {
+                resolve(data.toString('ascii', 12));
+            })
         })
     }
     send(cmd) {
         return new Promise((resolve, reject) => {
             if (!this.authed || !this.connected)
                 reject(new Error('Authentication error'))
-            this.sendRaw(cmd, 2) // request id 2 stands for command execute request
-            this.socket.once('data', (data) => {
-                resolve(data.toString('ascii', 12))
-            })
+            this.sendRaw(cmd, 2).then(p => resolve(p));
         })
     }
     disconnect() {
