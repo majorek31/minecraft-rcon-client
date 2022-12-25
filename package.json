@@ -21,11 +21,11 @@
   ],
   "author": "majorek31 @ github.com/majorek31",
   "license": "ISC",
-  "dependencies": {
+  "devDependencies": {
+    "@types/node": "^18.11.17",
     "typescript": "^4.9.4"
   },
-  "devDependencies": {
-    "@types/node": "^18.11.17"
-  },
-  "files": ["lib/**/*"]
+  "files": [
+    "lib/**/*"
+  ]
 }
