@@ -46,7 +46,7 @@ export class Rcon {
                         reject(new Error('Authentication error'));
                     }
                 });
-            })
+            });
         });
     }
     sendRaw(data: string, requestId: RequestId) {
@@ -63,19 +63,19 @@ export class Rcon {
             this.socket.write(buffer);
             this.socket.once('data', (data: Buffer) => {
                 resolve(data.toString('ascii', 12));
-            })
-        })
+            });
+        });
     }
     send(cmd: string) {
         return new Promise((resolve, reject) => {
             if (!this.authed || !this.connected)
-                reject(new Error('Authentication error'))
+                reject(new Error('Authentication error'));
             this.sendRaw(cmd, 2).then(p => resolve(p));
-        })
+        });
     }
     disconnect() {
-        this.connected = false
-        this.authed = false
-        this.socket.end()
+        this.connected = false;
+        this.authed = false;
+        this.socket.end();
     }
 }
