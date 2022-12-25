@@ -1,0 +1,9 @@
+{
+    "compilerOptions": {
+        "target": "ES6",
+        "declaration": true,
+        "strict": true,
+        "outDir": "lib",
+    },
+    "include": ["src"]
+}
