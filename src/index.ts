@@ -10,6 +10,11 @@ type Options = {
     port: number,
     password: String
 };
+enum RequestId {
+    CMD_RESPONSE = 0,
+    CMD_REQUEST = 2,
+    LOGIN = 3,
+}
 export class Rcon {
     options: Options;
     socket: net.Socket | undefined;
