@@ -17,5 +17,8 @@
     "javascript"
   ],
   "author": "majorek31 @ github.com/majorek31",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "typescript": "^4.9.4"
+  }
 }
