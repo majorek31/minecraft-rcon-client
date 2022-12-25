@@ -66,7 +66,7 @@ export class Rcon {
             })
         })
     }
-    send(cmd) {
+    send(cmd: string) {
         return new Promise((resolve, reject) => {
             if (!this.authed || !this.connected)
                 reject(new Error('Authentication error'))
