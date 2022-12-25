@@ -8,7 +8,7 @@ import * as crypto from 'crypto';
 type Options = {
     host: string,
     port: number,
-    password: String
+    password: string
 };
 enum RequestId {
     CMD_RESPONSE = 0,
@@ -34,7 +34,7 @@ export class Rcon {
             this.socket.once('connect', () => {
                 this.connected = true;
                 this.id = crypto.randomInt(Number.MAX_SAFE_INTEGER);
-                this.sendRaw(this.options.password, 3);
+                this.sendRaw(this.options.password, RequestId.LOGIN);
                 this.socket.once('data', (data) =>{
                     let response: number = data.readInt32LE(4);
                     if (response == this.id){
@@ -49,7 +49,7 @@ export class Rcon {
             })
         });
     }
-    sendRaw(data, requestId) {
+    sendRaw(data: string, requestId: RequestId) {
         return new Promise((resolve, reject) => {
             if (!this.connected)
                 reject(new Error('Authentication error'))
