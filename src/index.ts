@@ -33,7 +33,7 @@ export class Rcon {
             this.socket.once('error', () => reject(new Error('Connection error')));
             this.socket.once('connect', () => {
                 this.connected = true;
-                this.id = crypto.randomInt(Number.MAX_SAFE_INTEGER);
+                this.id = crypto.randomInt(2147483647);
                 this.sendRaw(this.options.password, RequestId.LOGIN);
                 this.socket.once('data', (data) =>{
                     let response: number = data.readInt32LE(4);
