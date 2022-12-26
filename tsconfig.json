@@ -3,6 +3,7 @@
         "target": "ES5",
         "declaration": true,
         "outDir": "lib",
+        "strict": true
     },
     "include": ["src"]
 }
