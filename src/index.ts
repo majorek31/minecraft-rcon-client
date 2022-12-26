@@ -17,7 +17,7 @@ enum RequestId {
 }
 export class Rcon {
     options: Options;
-    socket: net.Socket | undefined;
+    socket: net.Socket;
     connected: boolean;
     authed: boolean;
     id: number;
@@ -25,6 +25,7 @@ export class Rcon {
         this.options = options;
         this.connected = false;
         this.authed = false;
+        this.socket = new net.Socket;
         this.id = 0;
     }
     connect(){
