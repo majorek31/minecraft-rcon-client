@@ -17,7 +17,7 @@ enum RequestId {
 }
 export class Rcon {
     options: Options;
-    socket: net.Socket | undefined;
+    socket: net.Socket;
     connected: boolean;
     authed: boolean;
     id: number;
@@ -25,10 +25,11 @@ export class Rcon {
         this.options = options;
         this.connected = false;
         this.authed = false;
+        this.socket = new net.Socket;
         this.id = 0;
     }
     connect(){
-        return new Promise((resolve, reject) => {
+        return new Promise<null | Error>((resolve, reject) => {
             this.socket = net.createConnection(this.options.port, this.options.host);
             this.socket.once('error', () => reject(new Error('Connection error')));
             this.socket.once('connect', () => {
@@ -50,7 +51,7 @@ export class Rcon {
         });
     }
     sendRaw(data: string, requestId: RequestId) {
-        return new Promise((resolve, reject) => {
+        return new Promise<string>((resolve, reject) => {
             if (!this.connected)
                 reject(new Error('Authentication error'));
             let len = Buffer.byteLength(data);
@@ -67,7 +68,7 @@ export class Rcon {
         });
     }
     send(cmd: string) {
-        return new Promise((resolve, reject) => {
+        return new Promise<string>((resolve, reject) => {
             if (!this.authed || !this.connected)
                 reject(new Error('Authentication error'));
             this.sendRaw(cmd, 2).then(p => resolve(p));
