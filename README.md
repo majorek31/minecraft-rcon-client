@@ -1,6 +1,6 @@
 # minecraft-rcon-client
 
-## Promise based rcon client that i made for communication with my server
+## Promise based minecraft rcon client, with support of types
 
 ## Installation
 ```
