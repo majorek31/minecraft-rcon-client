@@ -8,7 +8,7 @@ npm i minecraft-rcon-client
 ```
 ## Usage
 ```
-const Rcon = require('minecraft-rcon-protocol')
+const { Rcon } = require('minecraft-rcon-client')
 const client = new Rcon({ // all of those are required!
     port: 25575,
     host: 'localhost',
