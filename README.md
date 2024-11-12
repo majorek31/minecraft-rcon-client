@@ -7,21 +7,15 @@
 npm i minecraft-rcon-client
 ```
 ## Usage
-```
-const { Rcon } = require('minecraft-rcon-client')
-const client = new Rcon({ // all of those are required!
+```ts
+import { Rcon } from "minecraft-rcon-client";
+const client = new Rcon({
+    host: '127.0.0.1',
     port: 25575,
-    host: 'localhost',
     password: 'test'
-})
-client.connect().then(() => {
-    client.send("time query day").then((response) => {
-        console.log(response)
-        client.disconnect()
-    }).catch(err => {
-        console.log("An error occurred while sending the query!")
-    })
-}).catch(err => {
-    console.log("Connection to server cannot be established!")
-})
+});
+await client.connect();
+const response = await client.query('list');
+console.log(response);
+await client.disconnect();
 ```
