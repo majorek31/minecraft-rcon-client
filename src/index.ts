@@ -1,82 +1,117 @@
-/*
-author: majorek31
-credits: https://wiki.vg/RCON
-*/
-import * as net from 'net';
-import { Buffer } from 'buffer';
-import * as crypto from 'crypto';
-type Options = {
-    host: string,
-    port: number,
-    password: string
-};
-enum RequestId {
-    CMD_RESPONSE = 0,
-    CMD_REQUEST = 2,
-    LOGIN = 3,
-}
+import { Options, Packet, PacketType } from "./types";
+import { Socket } from "net";
+
 export class Rcon {
-    options: Options;
-    socket: net.Socket;
-    connected: boolean;
-    authed: boolean;
-    id: number;
-    constructor(options: Options){
-        this.options = options;
+    private socket: Socket;
+    private connected: boolean;
+    private authed: boolean;
+    private options: Options;
+    private requestId: number = 0;
+
+    constructor(Options: Options){
+        this.options = Options;
         this.connected = false;
         this.authed = false;
-        this.socket = new net.Socket;
-        this.id = 0;
+        this.socket = new Socket();
+        this.socket.on('close', () => {
+            this.connected = false;
+            this.authed = false;
+            this.socket.destroy();
+        })
     }
-    connect(){
-        return new Promise<null | Error>((resolve, reject) => {
-            this.socket = net.createConnection(this.options.port, this.options.host);
-            this.socket.once('error', () => reject(new Error('Connection error')));
-            this.socket.once('connect', () => {
-                this.connected = true;
-                this.id = crypto.randomInt(2147483647);
-                this.sendRaw(this.options.password, RequestId.LOGIN);
-                this.socket.once('data', (data) =>{
-                    let response: number = data.readInt32LE(4);
-                    if (response == this.id){
-                        this.authed = true;
-                        resolve(null);
-                    }
-                    else{
-                        this.disconnect();
-                        reject(new Error('Authentication error'));
-                    }
-                });
-            });
-        });
+    public isConnected(): boolean {
+        return this.connected && this.authed;
     }
-    sendRaw(data: string, requestId: RequestId) {
-        return new Promise<string>((resolve, reject) => {
-            if (!this.connected)
-                reject(new Error('Authentication error'));
-            let len = Buffer.byteLength(data);
-            let buffer = Buffer.alloc(len + 14);
-            buffer.writeInt32LE(len + 10, 0);
-            buffer.writeInt32LE(this.id, 4);
-            buffer.writeInt32LE(requestId, 8);
-            buffer.write(data, 12, 'ascii');
-            buffer.writeInt16LE(0, 12 + len);
-            this.socket.write(buffer);
-            this.socket.once('data', (data: Buffer) => {
-                resolve(data.toString('ascii', 12));
-            });
-        });
-    }
-    send(cmd: string) {
-        return new Promise<string>((resolve, reject) => {
-            if (!this.authed || !this.connected)
-                reject(new Error('Authentication error'));
-            this.sendRaw(cmd, 2).then(p => resolve(p));
-        });
-    }
-    disconnect() {
+
+    public disconnect(): void {
         this.connected = false;
         this.authed = false;
         this.socket.end();
+    }
+    public async query(cmd: string): Promise<string> {
+        const response = await this.sendPacket({
+            type: PacketType.REQUEST,
+            body: cmd
+        });
+        return response.body;
+    }
+
+    public connect(): Promise<void> {
+        return new Promise((resolve, reject) => {
+            this.socket.connect(this.options.port, this.options.host, async () => {
+                try {
+                    await this.authenticate();
+                    this.connected = true;
+                    resolve();
+                } catch (error) {
+                    reject(error);
+                }
+                
+            });
+            this.socket.on('error', reject);
+        });
+    }
+
+    private async authenticate() {
+        const response = await this.sendPacket({
+            type: PacketType.LOGIN,
+            body: this.options.password
+        });
+        if (response.body !== '') {
+            throw new Error('Authentication error');
+        }
+        this.authed = true;
+    }
+
+    private async sendPacket(packet: Packet): Promise<Packet> {
+        return new Promise(async (resolve, reject) => {
+            try {
+                this.socket.write(await this.serializePacket(packet));
+                this.socket.once('data', (data) => {
+                    try {
+                        resolve(this.parsePacket(data));
+                    } catch (error) {
+                        reject(error);
+                    }
+                });
+            } catch (error) {
+                reject(error);
+            }
+        });
+    }
+    
+
+    private async parsePacket(data: Buffer): Promise<Packet> {
+        return new Promise((resolve, reject) => {
+            const size = data.readInt32LE(0);
+            const id = data.readInt32LE(4);
+            if (id === this.requestId) {
+                const type = data.readInt32LE(8);
+                const body = data.toString('utf-8', 12, 12 + size - 10);
+                resolve({ size, type, body, id});
+            } else {
+                reject(new Error('Invalid response id'));
+            }
+        });
+    }
+    private async serializePacket(packet: Packet): Promise<Buffer> {
+        return new Promise((resolve, reject) => {
+            if (packet.size === undefined) {
+                packet.size = Buffer.byteLength(packet.body);
+            }
+            if (packet.id === undefined) {
+                packet.id = ++this.requestId;
+            }
+            const length = 4 + 4 + packet.size + 2;
+            const buffer = Buffer.alloc(4 + length)
+
+            buffer.writeInt32LE(length, 0);
+            buffer.writeInt32LE(packet.id, 4);
+            buffer.writeInt32LE(packet.type, 8);
+            buffer.write(packet.body, 12, 'utf-8');
+            buffer.writeInt16LE(0, 12 + packet.size);
+
+            resolve(buffer);
+        });
     }
 }

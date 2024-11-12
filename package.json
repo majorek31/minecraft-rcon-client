@@ -1,7 +1,7 @@
 {
   "name": "minecraft-rcon-client",
-  "version": "2.1.2",
-  "description": "RCON client made for minecraft servers",
+  "version": "3.0.0",
+  "description": "Remote console client RCON. Allows you to send commands to any RCON server.",
   "repository": {
     "type": "git",
     "url": "https://github.com/majorek31/minecraft-rcon-client.git"
@@ -15,9 +15,10 @@
   },
   "keywords": [
     "nodejs",
-    "minecraft",
     "rcon",
-    "javascript"
+    "typescript",
+    "minecraft",
+    "typesafe"
   ],
   "author": "majorek31 @ github.com/majorek31",
   "license": "ISC",
