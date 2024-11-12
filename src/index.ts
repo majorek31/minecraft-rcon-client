@@ -19,7 +19,7 @@ export class Rcon {
             this.socket.destroy();
         })
     }
-    public async isConnected(): Promise<boolean> {
+    public isConnected(): boolean {
         return this.connected && this.authed;
     }
 
@@ -52,7 +52,7 @@ export class Rcon {
         });
     }
 
-    private async authenticate(): Promise<void> {
+    private async authenticate() {
         const response = await this.sendPacket({
             type: PacketType.LOGIN,
             body: this.options.password
@@ -64,25 +64,30 @@ export class Rcon {
     }
 
     private async sendPacket(packet: Packet): Promise<Packet> {
-        return new Promise((resolve, reject) => async () => {
-            this.socket.write(await this.serializePacket(packet));
-            this.socket.once('data', async (data) => {
-                try {
-                    resolve(this.parsePacket(data));
-                } catch (error) {
-                    reject(error);
-                }
-            });
+        return new Promise(async (resolve, reject) => {
+            try {
+                this.socket.write(await this.serializePacket(packet));
+                this.socket.once('data', (data) => {
+                    try {
+                        resolve(this.parsePacket(data));
+                    } catch (error) {
+                        reject(error);
+                    }
+                });
+            } catch (error) {
+                reject(error);
+            }
         });
     }
+    
 
     private async parsePacket(data: Buffer): Promise<Packet> {
         return new Promise((resolve, reject) => {
+            const size = data.readInt32LE(0);
             const id = data.readInt32LE(4);
             if (id === this.requestId) {
-                const size = data.readInt32LE(8);
-                const type = data.readInt32LE(12);
-                const body = data.toString('utf-8', 16, 16 + size);
+                const type = data.readInt32LE(8);
+                const body = data.toString('utf-8', 12, 12 + size - 10);
                 resolve({ size, type, body, id});
             } else {
                 reject(new Error('Invalid response id'));
